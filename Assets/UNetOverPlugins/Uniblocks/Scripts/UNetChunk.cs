@@ -32,19 +32,15 @@ public class UNetChunk : Chunk
 		//if (Engine.EnableMultiplayer && !Network.isServer) {
 		//	StartCoroutine (RequestVoxelData());	// if multiplayer, get data from server
 		//}
-		if(Engine.EnableMultiplayer && !GlobalInfo.Instance.MyPlayerCom.isServer)
+        if (Engine.EnableMultiplayer && !IUNet.IsServer())
 		{
-
-			//Debug.LogError("MultiplayerRequest");
 			StartCoroutine (RequestVoxelDataUNet());	// if multiplayer, get data from server
 		}
 		else if (Engine.SaveVoxelData && TryLoadVoxelData() == true ) {
 			// data is loaded through TryLoadVoxelData()
-			//Debug.LogError("LoadVoxelData ");
 		}
 		else 
 		{
-			//Debug.LogError("GenerateVoxelData ");
 			GenerateVoxelData();
 		}
 
@@ -53,7 +49,7 @@ public class UNetChunk : Chunk
 	IEnumerator RequestVoxelDataUNet () 
 	{ // waits until we're connected to a server and then sends a request for voxel data for this chunk to the server
 
-		while( !GlobalInfo.Instance.MyPlayerCom.isClient )//while (!Network.isClient) 
+        while (!IUNet.IsClient())//while (!Network.isClient) 
 		{
 			Debug.LogError("Not Client");
 			Chunk.CurrentChunkDataRequests = 0; // reset the counter if we're not connected
@@ -69,7 +65,7 @@ public class UNetChunk : Chunk
 		////Engine.UniblocksNetwork.GetComponent<NetworkView>().RPC ("SendVoxelData", RPCMode.Server, Network.player, ChunkIndex.x, ChunkIndex.y, ChunkIndex.z);
 
 		/// client ask for SendVoxelData
-		GlobalInfo.Instance.MyPlayerCom.CmdSendVoxelData(ChunkIndex.x, ChunkIndex.y, ChunkIndex.z);
+        IUniblockUnetClient.CmdSendVoxelData(ChunkIndex.x, ChunkIndex.y, ChunkIndex.z);
 
 	}
 }
