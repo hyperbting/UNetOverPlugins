@@ -15,6 +15,7 @@ public class UniblocksUNetServer : UniblocksServer
 	private Dictionary<NetworkInstanceId,int> PlayerChunkSpawnDistances; // chunk spawn distance for each player
 	#endregion
 	public IUniblockUnetServer myUniblockCom;
+	public UniblocksUNetClient myClient;
 
 	public static UniblocksUNetServer Instance;
 	void Awake () 
@@ -100,7 +101,7 @@ public class UniblocksUNetServer : UniblocksServer
 		//else {
 		//	GetComponent<UniblocksClient>().ReceivePlaceBlock (Network.player, x,y,z, chunkx,chunky,chunkz, data);
 		//}
-		myUniblockCom.myClient.ReceivePlaceBlock (myUniblockCom.netId, x,y,z, chunkx, chunky,chunkz, data, isChangeBlock);
+		myClient.ReceivePlaceBlock (myUniblockCom.GetNetworkInstanceID(), x, y, z, chunkx, chunky,chunkz, data, isChangeBlock);
 	}
 
 	// ===== send chunk data
