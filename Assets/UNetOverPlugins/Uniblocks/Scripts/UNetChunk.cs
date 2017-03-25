@@ -7,7 +7,11 @@ public class UNetChunk : Chunk
 {
 
 	public new void Awake () 
-	{ // chunk initialization (load/generate data, set position, etc.)
+	{
+        if (UNetChunkLoader.Instance.CreatedBlockLocation != null)
+            transform.parent = UNetChunkLoader.Instance.CreatedBlockLocation;
+
+        // chunk initialization (load/generate data, set position, etc.)
 		// Set variables
 		ChunkIndex = new Index (transform.position);
 		SideLength = Engine.ChunkSideLength;
@@ -29,14 +33,12 @@ public class UNetChunk : Chunk
 		transform.position = new Vector3 (transform.position.x * transform.localScale.x, transform.position.y * transform.localScale.y, transform.position.z * transform.localScale.z);
 
 		// Grab voxel data 
-		//if (Engine.EnableMultiplayer && !Network.isServer) {
-		//	StartCoroutine (RequestVoxelData());	// if multiplayer, get data from server
-		//}
-        if (Engine.EnableMultiplayer && !IUNet.IsServer())
-		{
-			StartCoroutine (RequestVoxelDataUNet());	// if multiplayer, get data from server
+        if (Engine.EnableMultiplayer && !UniBlocksUNetCom.Instance.isServer)//if (Engine.EnableMultiplayer && !Network.isServer) {
+        {
+            StartCoroutine(RequestVoxelDataUNet());//	StartCoroutine (RequestVoxelData());	// if multiplayer, get data from server
 		}
-		else if (Engine.SaveVoxelData && TryLoadVoxelData() == true ) {
+        else if (Engine.SaveVoxelData && TryLoadVoxelData() == true ) 
+        {
 			// data is loaded through TryLoadVoxelData()
 		}
 		else 
@@ -49,7 +51,7 @@ public class UNetChunk : Chunk
 	IEnumerator RequestVoxelDataUNet () 
 	{ // waits until we're connected to a server and then sends a request for voxel data for this chunk to the server
 
-        while (!IUNet.IsClient())//while (!Network.isClient) 
+        while (!UniBlocksUNetCom.Instance.isClient)//while (!Network.isClient) 
 		{
 			Debug.LogError("Not Client");
 			Chunk.CurrentChunkDataRequests = 0; // reset the counter if we're not connected
@@ -65,7 +67,7 @@ public class UNetChunk : Chunk
 		////Engine.UniblocksNetwork.GetComponent<NetworkView>().RPC ("SendVoxelData", RPCMode.Server, Network.player, ChunkIndex.x, ChunkIndex.y, ChunkIndex.z);
 
 		/// client ask for SendVoxelData
-        IUniblockUnetClient.CmdSendVoxelData(ChunkIndex.x, ChunkIndex.y, ChunkIndex.z);
+        UniblocksUNetClient.Instance.myClientCom.CmdSendVoxelData(ChunkIndex.x, ChunkIndex.y, ChunkIndex.z);
 
 	}
 }

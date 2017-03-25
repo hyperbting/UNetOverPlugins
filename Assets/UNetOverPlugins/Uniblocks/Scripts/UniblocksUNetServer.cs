@@ -11,10 +11,10 @@ public class UniblocksUNetServer : UniblocksServer
 	//override the private one in base..
 	private float autoSaveTimerUNet;
 
-	private Dictionary<NetworkInstanceId,Index> PlayerPositions; // stores the index of each player's origin chunk. Changes will only be sent if the change is within their radius
-	private Dictionary<NetworkInstanceId,int> PlayerChunkSpawnDistances; // chunk spawn distance for each player
+	private Dictionary<NetworkInstanceId, Index> PlayerPositions; // stores the index of each player's origin chunk. Changes will only be sent if the change is within their radius
+	private Dictionary<NetworkInstanceId, int> PlayerChunkSpawnDistances; // chunk spawn distance for each player
 	#endregion
-	public IUniblockUnetServer myUniblockCom;
+	public IUniblockUnetServer myServerCom;
 	public UniblocksUNetClient myClient;
 
 	public static UniblocksUNetServer Instance;
@@ -28,10 +28,11 @@ public class UniblocksUNetServer : UniblocksServer
 		Engine.UniblocksNetwork = this.gameObject;
 
 		ResetPlayerData();
-		if (Network.isServer) 
-		{
-			Debug.Log ("UniblocksServer: Server initialized.");
-		}
+
+        //if (Network.isServer)
+        //{
+        //    Debug.Log("UniblocksServer: Server initialized.");
+        //}
 	}
 
 	void ResetPlayerData () 
@@ -78,13 +79,14 @@ public class UniblocksUNetServer : UniblocksServer
 		ApplyOnServer (x,y,z, chunkx, chunky, chunkz, data, isChangeBlock);
 
 		//// send to every client with IN RANGE
-		if (Engine.MultiplayerTrackPosition == false || IsWithinRange (myUniblockCom.GetNetworkInstanceID(), new Index (chunkx,chunky,chunkz))) { // check if the change is within range of each player
+        if (Engine.MultiplayerTrackPosition == false || IsWithinRange(sender, new Index(chunkx, chunky, chunkz)))//if (Engine.MultiplayerTrackPosition == false || IsWithinRange(myClient.UNetCom.GetNetId(), new Index(chunkx, chunky, chunkz)))
+        { // check if the change is within range of each player
 
 			if (EnableDebugLog)  
 				Debug.Log ("UniblocksServer: Sending voxel change to player " + sender.ToString());
 
 			//RpcReceivePlaceBlock with isChangeBlock true == RpcReceiveChangeBlock
-			myUniblockCom.RpcReceivePlaceBlock (sender, x,y,z, chunkx, chunky,chunkz, data, isChangeBlock);
+			myServerCom.RpcReceivePlaceBlock (sender, x,y,z, chunkx, chunky,chunkz, data, isChangeBlock);
 		}
 	}
 
@@ -101,7 +103,7 @@ public class UniblocksUNetServer : UniblocksServer
 		//else {
 		//	GetComponent<UniblocksClient>().ReceivePlaceBlock (Network.player, x,y,z, chunkx,chunky,chunkz, data);
 		//}
-		myClient.ReceivePlaceBlock (myUniblockCom.GetNetworkInstanceID(), x, y, z, chunkx, chunky,chunkz, data, isChangeBlock);
+        myClient.ReceivePlaceBlock(UniBlocksUNetCom.Instance.netId, x, y, z, chunkx, chunky, chunkz, data, isChangeBlock);
 	}
 
 	// ===== send chunk data
@@ -125,7 +127,7 @@ public class UniblocksUNetServer : UniblocksServer
 		////GetComponent<NetworkView>().RPC ("ReceiveVoxelData", player, chunkx, chunky, chunkz, dataBytes); // send compressed data to the player who requested it
 
 		// send compressed data to the target player who requested it
-		myUniblockCom.TargetReceiveVoxelData( target, chunkx, chunky, chunkz, dataBytes );
+		myServerCom.TargetReceiveVoxelData( target, chunkx, chunky, chunkz, dataBytes );
 	}
 
 	// ===== save data
@@ -160,6 +162,19 @@ public class UniblocksUNetServer : UniblocksServer
 
 		return true;
 	}
+
+    bool IsWithinRange( Index chunkIndex)
+    { // checks if the player is within the range of the chunk
+        UnityEngine.Networking.NetworkInstanceId player = UniBlocksUNetCom.Instance.netId;
+        if (Mathf.Abs(PlayerPositions[player].x - chunkIndex.x) > PlayerChunkSpawnDistances[player] ||
+            Mathf.Abs(PlayerPositions[player].y - chunkIndex.y) > PlayerChunkSpawnDistances[player] ||
+            Mathf.Abs(PlayerPositions[player].z - chunkIndex.z) > PlayerChunkSpawnDistances[player])
+        {
+            return false;
+        }
+
+        return true;
+    }
 
 	// convert string to byte array
 	public static byte[] GetBytes(string str)

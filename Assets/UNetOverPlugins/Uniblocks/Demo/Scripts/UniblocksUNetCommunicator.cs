@@ -14,7 +14,7 @@ public class UniblocksUNetCommunicator : NetworkBehaviour, IUniblockUnetServer
 		myServer = GetComponent<UniblocksUNetServer> ();
 
 		//myClient.myUniblockCom = this;
-		myServer.myUniblockCom = this;
+		myServer.myServerCom = this;
 	}
 
 	public override void OnStartClient()

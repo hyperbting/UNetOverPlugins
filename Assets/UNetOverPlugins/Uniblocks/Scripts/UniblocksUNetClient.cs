@@ -7,47 +7,47 @@ using Uniblocks;
 //this will be NetworkServer.Spawn() can do [Command] itself
 public class UniblocksUNetClient : UniblocksClient 
 {
-	public IUniblockUnetClient myUniblockCom;
+	public IUniblockUnetClient myClientCom;
 
 	public static UniblocksUNetClient Instance;
 	public virtual void Awake()
 	{
 		Instance = this;
+        myClientCom = UNetChunkLoader.Instance;
 	}
 
 	// ===== network communication ============
-	public new static void UpdatePlayerPosition (int x, int y, int z) 
+	public static void UpdatePlayerPosition (int x, int y, int z) 
 	{
+        Debug.LogError("!");
 		UniblocksUNetClient.Instance.UpdatePlayerPositionUNet (x, y, z) ;
 	}
 
-	public new static void UpdatePlayerPosition (Index index) 
+    public static void UpdatePlayerPosition(Index index) 
 	{
 		//use the above one
 		UniblocksUNetClient.UpdatePlayerPosition (index.x, index.y, index.z);
 	}
 
-	public new static void UpdatePlayerRange (int range) 
+    public static void UpdatePlayerRange(int range) 
 	{
+        Debug.LogError("!");
 		UniblocksUNetClient.Instance.UpdatePlayerRangeUNet (range);
 	}
 
-	public void UpdatePlayerPositionUNet (int x, int y, int z) 
-	{
-		////Engine.UniblocksNetwork.GetComponent<NetworkView>().RPC ("UpdatePlayerPosition", RPCMode.Server, Network.player, x, y, z);
-		myUniblockCom.CmdUpdatePlayerPosition(x, y, z);
+	public void UpdatePlayerPositionUNet (int x, int y, int z)
+    {
+        myClientCom.CmdUpdatePlayerPosition(x, y, z); ////Engine.UniblocksNetwork.GetComponent<NetworkView>().RPC ("UpdatePlayerPosition", RPCMode.Server, Network.player, x, y, z);
 	}
 
 	public void UpdatePlayerPositionUNet (Index index) 
 	{
-		////Engine.UniblocksNetwork.GetComponent<NetworkView>().RPC ("UpdatePlayerPosition", RPCMode.Server, Network.player, index.x, index.y, index.z);
-		UpdatePlayerPositionUNet (index.x, index.y, index.z);
+        UpdatePlayerPositionUNet(index.x, index.y, index.z); ////Engine.UniblocksNetwork.GetComponent<NetworkView>().RPC ("UpdatePlayerPosition", RPCMode.Server, Network.player, index.x, index.y, index.z);
 	}
 
 	public void UpdatePlayerRangeUNet (int range) 
 	{
-		////Engine.UniblocksNetwork.GetComponent<NetworkView>().RPC ("UpdatePlayerRange", RPCMode.Server, Network.player, range);
-		myUniblockCom.CmdUpdatePlayerRange(range);
+        myClientCom.CmdUpdatePlayerRange(range); ////Engine.UniblocksNetwork.GetComponent<NetworkView>().RPC ("UpdatePlayerRange", RPCMode.Server, Network.player, range);
 	}
 
 	/* To send info local player is required... */
@@ -68,7 +68,10 @@ public class UniblocksUNetClient : UniblocksClient
 		//}
 
 		//send to server
-		myUniblockCom.CmdSendPlaceBlock(info.index.x, info.index.y, info.index.z, chunkx, chunky, chunkz, (int)data);
+        if (UNetChunkLoader.Instance.isServer)
+            UniblocksUNetServer.Instance.ServerChangeBlock(UNetChunkLoader.Instance.netId, info.index.x, info.index.y, info.index.z, chunkx, chunky, chunkz, (int)data);
+        else
+            myClientCom.CmdSendPlaceBlock(info.index.x, info.index.y, info.index.z, chunkx, chunky, chunkz, (int)data);
 
 	}
 
@@ -89,7 +92,7 @@ public class UniblocksUNetClient : UniblocksClient
 		//}
 
 		//// send to server
-		myUniblockCom.CmdSendChangeBlock(info.index.x, info.index.y, info.index.z, chunkx, chunky, chunkz, (int)data);
+		myClientCom.CmdSendChangeBlock(info.index.x, info.index.y, info.index.z, chunkx, chunky, chunkz, (int)data);
 	}
 
 	public virtual void ReceivePlaceBlock(NetworkInstanceId sender, int x, int y, int z, int chunkx, int chunky, int chunkz, int data, bool isChangeBlock=false)
@@ -106,16 +109,14 @@ public class UniblocksUNetClient : UniblocksClient
 
 		if (!isChangeBlock && data == 0) 
 		{
-			//data == 0 && is Place Block
-			////Voxel.DestroyBlockMultiplayer (info, sender);
-			this.DestroyBlockMultiplayer (info);
+            //data == 0 && is Place Block
+            this.DestroyBlockMultiplayer(info);	////Voxel.DestroyBlockMultiplayer (info, sender);
 			return;
 		} 
 		else 
 		{
 			//isChangeBlock && (is Place Block, data != 0 )
-			////Voxel.PlaceBlockMultiplayer (info, (ushort)data, sender);
-			this.PlaceBlockMultiplayer (info, (ushort)data);
+            this.PlaceBlockMultiplayer(info, (ushort)data); ////Voxel.PlaceBlockMultiplayer (info, (ushort)data, sender);
 		}
 	}
 
@@ -157,6 +158,7 @@ public class UniblocksUNetClient : UniblocksClient
 	void DestroyBlockMultiplayer ( VoxelInfo voxelInfo) 
 	{
 		GameObject voxelObject = Instantiate ( Engine.GetVoxelGameObject (voxelInfo.GetVoxel()) ) as GameObject;
+
 		VoxelEvents events = voxelObject.GetComponent<VoxelEvents>();
 		if (events != null) 
 		{
@@ -172,6 +174,7 @@ public class UniblocksUNetClient : UniblocksClient
 		voxelInfo.chunk.SetVoxel (voxelInfo.index, data, true);
 
 		GameObject voxelObject = Instantiate ( Engine.GetVoxelGameObject (data) ) as GameObject;
+
 		VoxelEvents events = voxelObject.GetComponent<VoxelEvents>();
 		if (events != null) 
 		{
