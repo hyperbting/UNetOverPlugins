@@ -7,7 +7,7 @@ using UnityEngine.Networking;
 /// <summary>
 /// UNet chunk loader.
 /// copy from Uniblocks ChunkLoader.cs with adaption for UNet
-/// this script have to be attached to player!
+/// this script have to be attached to PLAYER!
 /// the voxel world have to be load from the LocalPlayer not Server!
 /// </summary>
 public class UNetChunkLoader : NetworkBehaviour, IUniblockUnetClient
@@ -27,7 +27,8 @@ public class UNetChunkLoader : NetworkBehaviour, IUniblockUnetClient
     {
         GameObject targetPlace = GameObject.Find(CreatedBlockLocationName);
 
-        if (!targetPlace){
+        if (!targetPlace)
+        {
             targetPlace = new GameObject(CreatedBlockLocationName);
         }
 
@@ -93,7 +94,6 @@ public class UNetChunkLoader : NetworkBehaviour, IUniblockUnetClient
     //Only Host and Client have this
     public override void OnStartLocalPlayer()
     {
-
         //now I know this is my local loader
         Instance = this;
 
@@ -125,7 +125,7 @@ public class UNetChunkLoader : NetworkBehaviour, IUniblockUnetClient
     void StartUniblockUNet()
     {
         if (EnableDebugLog) Debug.Log("Initial UniblocksNetwork");
-        var go = Instantiate(UniblocksNetworkPrefab, Vector3.zero, Quaternion.identity);
+        var go = Instantiate(UniblocksNetworkPrefab);
         NetworkServer.Spawn(go);
     }
 

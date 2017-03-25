@@ -32,7 +32,6 @@ public class UniblocksUNetClient : UniblocksClient
 	/* To send info local player is required... */
 	public override void SendPlaceBlock ( VoxelInfo info, ushort data ) 
 	{	// sends a voxel change to the server, which then redistributes it to other clients
-
 		// convert to ints
 		int chunkx = info.chunk.ChunkIndex.x;
 		int chunky = info.chunk.ChunkIndex.y;
@@ -45,15 +44,11 @@ public class UniblocksUNetClient : UniblocksClient
 		//else {
 		//	GetComponent<NetworkView>().RPC ("ServerPlaceBlock", RPCMode.Server, Network.player, info.index.x, info.index.y, info.index.z, chunkx,chunky,chunkz, (int)data);
 		//}
-
-		//send to server
         UNetChunkLoader.Instance.CmdSendPlaceBlock(info.index.x, info.index.y, info.index.z, chunkx, chunky, chunkz, (int)data);
-
-	}
+    }
 
 	public override void SendChangeBlock(VoxelInfo info, ushort data)
 	{
-
 		// convert to ints
 		int chunkx = info.chunk.ChunkIndex.x;
 		int chunky = info.chunk.ChunkIndex.y;
@@ -95,7 +90,6 @@ public class UniblocksUNetClient : UniblocksClient
             this.PlaceBlockMultiplayer(info, (ushort)data); ////Voxel.PlaceBlockMultiplayer (info, (ushort)data, sender);
 		}
 	}
-
 
 	public new void ReceiveVoxelData ( int chunkx, int chunky, int chunkz, byte[] data ) 
 	{

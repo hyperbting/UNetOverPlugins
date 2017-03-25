@@ -53,16 +53,16 @@ public class UNetChunk : Chunk
 	{ // waits until we're connected to a server and then sends a request for voxel data for this chunk to the server
         
         while (!UniBlocksUNetCom.Instance.isClient)//while (!Network.isClient) 
-		{
+        {
 			Debug.LogError("Not a Client");
 			Chunk.CurrentChunkDataRequests = 0; // reset the counter if we're not connected
 			yield return new WaitForEndOfFrame();
-		}
+        }
         
-		while (Engine.MaxChunkDataRequests != 0 && Chunk.CurrentChunkDataRequests >= Engine.MaxChunkDataRequests) 
+        while (Engine.MaxChunkDataRequests != 0 && Chunk.CurrentChunkDataRequests >= Engine.MaxChunkDataRequests) 
 		{
             Debug.LogError("Too Many Chunk Requests");
-			yield return new WaitForEndOfFrame();
+            yield return new WaitForEndOfFrame();
 		}
 
 		Chunk.CurrentChunkDataRequests ++;
