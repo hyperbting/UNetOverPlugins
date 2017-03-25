@@ -17,18 +17,20 @@ public class UNetChunkLoader : NetworkBehaviour, IUniblockUnetClient
     public Transform CreatedBlockLocation;
     public GameObject UniblocksNetworkPrefab;
 
+    public List<Behaviour> LocalPlayerItems;
+
     private Index LastPos;
     private Index currentPos;
 
     public static UNetChunkLoader Instance;
     public void Awake()
     {
-        Instance = this;
-
         GameObject targetPlace = GameObject.Find(CreatedBlockLocationName);
+
         if (!targetPlace){
             targetPlace = new GameObject(CreatedBlockLocationName);
         }
+
         CreatedBlockLocation = targetPlace.transform;
     }
 
@@ -42,6 +44,11 @@ public class UNetChunkLoader : NetworkBehaviour, IUniblockUnetClient
 
         // don't load chunks if multiplayer is enabled but the connection isn't established yet
         if (!isClient && !isServer)//if (Engine.EnableMultiplayer && !Network.isClient && !Network.isServer) 
+        {
+            return;
+        }
+
+        if (!hasAuthority)
         {
             return;
         }
@@ -69,21 +76,41 @@ public class UNetChunkLoader : NetworkBehaviour, IUniblockUnetClient
     }
 
     // UNet multiplayer
-
-    //only Server and Host(Server+Client) have this
     public override void OnStartServer()
     {
         base.OnStartServer();
+        if (EnableDebugLog) Debug.LogWarning(isServer + " " + isClient + " " + isLocalPlayer);//T F F !! for Server!!!
+    }
 
-        //Network Instantiate UniblocksNetworkPrefab for communication
-        StartUniblockUNet();
-
+    //only Server and Host(Server+Client) have this
+    public override void OnStartClient()
+    {
+        base.OnStartClient();
+        if (EnableDebugLog) Debug.LogWarning(isServer + " " + isClient + " " + isLocalPlayer);//T T F !! for Server!!!
+        
     }
 
     //Only Host and Client have this
     public override void OnStartLocalPlayer()
     {
+
+        //now I know this is my local loader
+        Instance = this;
+
         base.OnStartLocalPlayer();
+        if (EnableDebugLog) Debug.LogWarning(isServer + " " + isClient + " " + isLocalPlayer);//T T T !! for Server!!!
+
+        //Specific item for local player to use
+        if (LocalPlayerItems != null)
+            for (int i = 0; i < LocalPlayerItems.Count; i++)
+                LocalPlayerItems[i].enabled = true;
+
+        //Network Instantiate UniblocksNetworkPrefab for communication
+        if (Engine.EnableMultiplayer && isServer)
+        {
+            if (EnableDebugLog) Debug.Log("Initial UniblockUNet Service");
+            StartUniblockUNet();
+        }
 
         //track Client player position if required
         if (Engine.MultiplayerTrackPosition)
@@ -97,6 +124,7 @@ public class UNetChunkLoader : NetworkBehaviour, IUniblockUnetClient
 
     void StartUniblockUNet()
     {
+        if (EnableDebugLog) Debug.Log("Initial UniblocksNetwork");
         var go = Instantiate(UniblocksNetworkPrefab, Vector3.zero, Quaternion.identity);
         NetworkServer.Spawn(go);
     }
@@ -111,13 +139,15 @@ public class UNetChunkLoader : NetworkBehaviour, IUniblockUnetClient
         //UniblocksUNetClient.UpdatePlayerPosition (currentPos);
         //UniblocksUNetClient.UpdatePlayerRange (Engine.ChunkSpawnDistance);
         if (EnableDebugLog) Debug.Log("UpdatePlayerPositionUNet");
+
         UniblocksUNetClient.Instance.UpdatePlayerPositionUNet(currentPos);
+
         if (EnableDebugLog) Debug.Log("UpdatePlayerRangeUNet");
+
         UniblocksUNetClient.Instance.UpdatePlayerRangeUNet(Engine.ChunkSpawnDistance);
     }
 
-    //based on the "command only on local player object" limitation. 
-    //Every [Command] here have to move under player object
+    //based on the "command only on local player object" limitation. This script has to be under player object
     #region Command to Server
 	[Command]
 	public void CmdSendVoxelData (int chunkx, int chunky, int chunkz ) 
@@ -126,7 +156,7 @@ public class UNetChunkLoader : NetworkBehaviour, IUniblockUnetClient
 			return;
 		
 		//[Server]sender "target" tells me to SendVoxelData to him
-		//This is only valid for PLAYER OBJECTS on the server.
+        if (EnableDebugLog) Debug.LogFormat("Asking for {0} {1} {2} Data", chunkx, chunky, chunkz);
         UniblocksUNetServer.Instance.SendVoxelData(connectionToClient, chunkx, chunky, chunkz);
 	}
 		

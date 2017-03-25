@@ -14,7 +14,7 @@ public class UniblocksUNetServer : UniblocksServer
 	private Dictionary<NetworkInstanceId, Index> PlayerPositions; // stores the index of each player's origin chunk. Changes will only be sent if the change is within their radius
 	private Dictionary<NetworkInstanceId, int> PlayerChunkSpawnDistances; // chunk spawn distance for each player
 	#endregion
-	public IUniblockUnetServer myServerCom;
+    public UniBlocksUNetCom myServerCom;
 	public UniblocksUNetClient myClient;
 
 	public static UniblocksUNetServer Instance;
@@ -28,11 +28,6 @@ public class UniblocksUNetServer : UniblocksServer
 		Engine.UniblocksNetwork = this.gameObject;
 
 		ResetPlayerData();
-
-        //if (Network.isServer)
-        //{
-        //    Debug.Log("UniblocksServer: Server initialized.");
-        //}
 	}
 
 	void ResetPlayerData () 
@@ -162,19 +157,6 @@ public class UniblocksUNetServer : UniblocksServer
 
 		return true;
 	}
-
-    bool IsWithinRange( Index chunkIndex)
-    { // checks if the player is within the range of the chunk
-        UnityEngine.Networking.NetworkInstanceId player = UniBlocksUNetCom.Instance.netId;
-        if (Mathf.Abs(PlayerPositions[player].x - chunkIndex.x) > PlayerChunkSpawnDistances[player] ||
-            Mathf.Abs(PlayerPositions[player].y - chunkIndex.y) > PlayerChunkSpawnDistances[player] ||
-            Mathf.Abs(PlayerPositions[player].z - chunkIndex.z) > PlayerChunkSpawnDistances[player])
-        {
-            return false;
-        }
-
-        return true;
-    }
 
 	// convert string to byte array
 	public static byte[] GetBytes(string str)

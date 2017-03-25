@@ -7,37 +7,16 @@ using Uniblocks;
 //this will be NetworkServer.Spawn() can do [Command] itself
 public class UniblocksUNetClient : UniblocksClient 
 {
-	public IUniblockUnetClient myClientCom;
-
-	public static UniblocksUNetClient Instance;
+    public static UniblocksUNetClient Instance;
 	public virtual void Awake()
 	{
 		Instance = this;
-        myClientCom = UNetChunkLoader.Instance;
 	}
 
 	// ===== network communication ============
-	public static void UpdatePlayerPosition (int x, int y, int z) 
-	{
-        Debug.LogError("!");
-		UniblocksUNetClient.Instance.UpdatePlayerPositionUNet (x, y, z) ;
-	}
-
-    public static void UpdatePlayerPosition(Index index) 
-	{
-		//use the above one
-		UniblocksUNetClient.UpdatePlayerPosition (index.x, index.y, index.z);
-	}
-
-    public static void UpdatePlayerRange(int range) 
-	{
-        Debug.LogError("!");
-		UniblocksUNetClient.Instance.UpdatePlayerRangeUNet (range);
-	}
-
 	public void UpdatePlayerPositionUNet (int x, int y, int z)
     {
-        myClientCom.CmdUpdatePlayerPosition(x, y, z); ////Engine.UniblocksNetwork.GetComponent<NetworkView>().RPC ("UpdatePlayerPosition", RPCMode.Server, Network.player, x, y, z);
+        UNetChunkLoader.Instance.CmdUpdatePlayerPosition(x, y, z); ////Engine.UniblocksNetwork.GetComponent<NetworkView>().RPC ("UpdatePlayerPosition", RPCMode.Server, Network.player, x, y, z);
 	}
 
 	public void UpdatePlayerPositionUNet (Index index) 
@@ -47,7 +26,7 @@ public class UniblocksUNetClient : UniblocksClient
 
 	public void UpdatePlayerRangeUNet (int range) 
 	{
-        myClientCom.CmdUpdatePlayerRange(range); ////Engine.UniblocksNetwork.GetComponent<NetworkView>().RPC ("UpdatePlayerRange", RPCMode.Server, Network.player, range);
+        UNetChunkLoader.Instance.CmdUpdatePlayerRange(range); ////Engine.UniblocksNetwork.GetComponent<NetworkView>().RPC ("UpdatePlayerRange", RPCMode.Server, Network.player, range);
 	}
 
 	/* To send info local player is required... */
@@ -68,10 +47,7 @@ public class UniblocksUNetClient : UniblocksClient
 		//}
 
 		//send to server
-        if (UNetChunkLoader.Instance.isServer)
-            UniblocksUNetServer.Instance.ServerChangeBlock(UNetChunkLoader.Instance.netId, info.index.x, info.index.y, info.index.z, chunkx, chunky, chunkz, (int)data);
-        else
-            myClientCom.CmdSendPlaceBlock(info.index.x, info.index.y, info.index.z, chunkx, chunky, chunkz, (int)data);
+        UNetChunkLoader.Instance.CmdSendPlaceBlock(info.index.x, info.index.y, info.index.z, chunkx, chunky, chunkz, (int)data);
 
 	}
 
@@ -92,7 +68,7 @@ public class UniblocksUNetClient : UniblocksClient
 		//}
 
 		//// send to server
-		myClientCom.CmdSendChangeBlock(info.index.x, info.index.y, info.index.z, chunkx, chunky, chunkz, (int)data);
+        UNetChunkLoader.Instance.CmdSendChangeBlock(info.index.x, info.index.y, info.index.z, chunkx, chunky, chunkz, (int)data);
 	}
 
 	public virtual void ReceivePlaceBlock(NetworkInstanceId sender, int x, int y, int z, int chunkx, int chunky, int chunkz, int data, bool isChangeBlock=false)
