@@ -1,8 +1,10 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using Uniblocks;
 using UnityEngine;
 using UnityEngine.Networking;
+
+#if UNetOverUniblocks
+using Uniblocks;
 
 /// <summary>
 /// UNet chunk loader.
@@ -203,3 +205,4 @@ public class UNetChunkLoader : NetworkBehaviour, IUniblockUnetClient
     }
     #endregion
 }
+#endif

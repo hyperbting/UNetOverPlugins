@@ -1,6 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+
+#if UNetOverUniblocks
 using Uniblocks;
 
 public class UNetChunk : Chunk 
@@ -73,3 +75,4 @@ public class UNetChunk : Chunk
 
 	}
 }
+#endif

@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
+
+#if UNetOverUniblocks
 using Uniblocks;
 
 //this will be NetworkServer.Spawn() can do [Command] itself
@@ -155,3 +157,4 @@ public class UniblocksUNetClient : UniblocksClient
 	}
 	#endregion
 }
+#endif

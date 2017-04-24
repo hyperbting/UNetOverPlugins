@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
+
+#if UNetOverUniblocks
 using Uniblocks;
 
 [RequireComponent(typeof(UniblocksUNetClient))]
@@ -175,3 +177,4 @@ public class UniblocksUNetServer : UniblocksServer
 	}
 	#endregion
 }
+#endif

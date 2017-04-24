@@ -1,9 +1,10 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using Uniblocks;
 using UnityEngine;
 using UnityEngine.Networking;
 
+#if UNetOverUniblocks
+using Uniblocks;
 public class UniBlocksUNetCom : NetworkBehaviour, IUniblockUnetServer 
 {
     protected UniblocksUNetServer myServer;
@@ -116,3 +117,4 @@ public class UniBlocksUNetCom : NetworkBehaviour, IUniblockUnetServer
 	*/
     #endregion end Commands 
 }
+#endif

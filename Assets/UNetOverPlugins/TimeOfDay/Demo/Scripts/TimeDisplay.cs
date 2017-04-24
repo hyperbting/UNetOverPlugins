@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+#if UNetOverTimeOfDay
 public class TimeDisplay : MonoBehaviour 
 {
 
@@ -44,3 +45,4 @@ public class TimeDisplay : MonoBehaviour
         return string.Format("{0:00}:{1:00}", hour, min);
     }
 }
+#endif

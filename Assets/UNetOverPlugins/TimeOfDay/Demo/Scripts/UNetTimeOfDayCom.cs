@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
 
+#if UNetOverTimeOfDay
 public class UNetTimeOfDayCom : NetworkBehaviour, ITimeOfDayUNet
 {
 
@@ -69,3 +70,4 @@ public class UNetTimeOfDayCom : NetworkBehaviour, ITimeOfDayUNet
     }
     #endregion
 }
+#endif
